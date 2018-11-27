@@ -23,6 +23,7 @@ import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
 import org.opencv.imgproc.Imgproc;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -31,6 +32,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.View.OnTouchListener;
 import android.view.SurfaceView;
+import android.widget.Button;
 
 public class MainActivity extends Activity implements OnTouchListener, CvCameraViewListener2 {
     private static final String  TAG              = "MainActivity";
@@ -73,13 +75,19 @@ public class MainActivity extends Activity implements OnTouchListener, CvCameraV
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
+
         Log.i(TAG, "called onCreate");
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
         setContentView(R.layout.activity_main);
-
+        Button button=(Button) findViewById(R.id.button3);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+            startActivity(new Intent(MainActivity.this,pop.class));
+            }
+        });
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.color_blob_detection_activity_surface_view);
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
         mOpenCvCameraView.setCvCameraViewListener(this);
@@ -183,8 +191,8 @@ public class MainActivity extends Activity implements OnTouchListener, CvCameraV
         final MatOfInt hull= new MatOfInt();
         Point p1= new Point(0,200);
         Point p2= new Point(mRgba.width(),200);
-
-
+        Point centerobj=new Point(0,0);
+        Rect DetArea=new Rect(300,100,300,300);
         if (mIsColorSelected) {
             mDetector.process(mRgba);
             List<MatOfPoint> contours = mDetector.getContours();
@@ -192,6 +200,7 @@ public class MainActivity extends Activity implements OnTouchListener, CvCameraV
             int k = 0;
             double[] x= new double[1000000];
             double[] y= new double[1000000];
+
             MatOfPoint2f approxCurve = new MatOfPoint2f();
 
             //For each contour found
@@ -211,18 +220,29 @@ public class MainActivity extends Activity implements OnTouchListener, CvCameraV
 
                 // draw enclosing rectangle (all same color, but you could use variable i to make them unique)
                 Imgproc.rectangle(mRgba, new Point(rect.x,rect.y), new Point(rect.x+rect.width,rect.y+rect.height), new Scalar (255, 0, 0, 255), 3);
+                centerobj.x=rect.x/2;
+                centerobj.y=rect.y/2;
 
+                android.graphics.Rect r1= new android.graphics.Rect(rect.x,rect.y,rect.width,rect.height);
+                android.graphics.Rect r2= new android.graphics.Rect(DetArea.x,DetArea.y,DetArea.width,DetArea.height);
+                if (r1.intersect(r2)){
+                    Imgproc.rectangle(mRgba,new Point(DetArea.x,DetArea.y),new Point(DetArea.x+DetArea.width,DetArea.y+DetArea.height),new Scalar(0,255,0,255),3);
+                }else{
+                    Imgproc.rectangle(mRgba,new Point(DetArea.x,DetArea.y),new Point(DetArea.x+DetArea.width,DetArea.y+DetArea.height),new Scalar(255,0,0,255),3);
 
+                }
 
             }
-
 
             Mat colorLabel = mRgba.submat(4, 68, 4, 68);
             colorLabel.setTo(mBlobColorRgba);
 
             Mat spectrumLabel = mRgba.submat(4, 4 + mSpectrum.rows(), 70, 70 + mSpectrum.cols());
             mSpectrum.copyTo(spectrumLabel);
-            Imgproc.line(mRgba,p1,p2,new Scalar(0,255,0),10);
+
+
+
+
         }
 
         return mRgba;
@@ -235,4 +255,5 @@ public class MainActivity extends Activity implements OnTouchListener, CvCameraV
 
         return new Scalar(pointMatRgba.get(0, 0));
     }
+
 }

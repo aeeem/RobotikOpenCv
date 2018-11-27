@@ -4,7 +4,7 @@
     <uses-permission android:name="android.permission.CAMERA"/>
 
     <uses-feature android:name="android.hardware.camera" android:required="false"/>
-    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false"/>
+    <!--<uses-feature android:name="android.hardware.camera.autofocus" android:required="false"/>-->
     <uses-feature android:name="android.hardware.camera.front" android:required="false"/>
     <uses-feature android:name="android.hardware.camera.front.autofocus" android:required="false"/>
     <application
@@ -21,7 +21,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
+        <activity android:name=".pop"
+            android:theme="@style/AppTheme.CustomTheme"></activity>
     </application>
 
 </manifest>
